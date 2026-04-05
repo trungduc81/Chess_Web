@@ -1,0 +1,144 @@
+
+
+* {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-6px);
+    }
+    75% {
+        transform: translateX(6px);
+    }
+}
+
+
+
+.glass {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-effect {
+    background: rgba(15, 10, 5, 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-light {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.glass-brown {
+    background: rgba(40, 35, 30, 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-fade-in-slow {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.shake {
+    animation: shake 0.2s ease-in-out 0s 2;
+}
+
+
+
+.bg-chessboard {
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-chessboard-anh2 {
+    background-image: url('../images/anh2.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-chessboard-anh3 {
+    background-image: url('../images/anh3.png');
+    background-size: cover;
+    background-position: center;
+}
+
+
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+
+
+.accent-color {
+    color: #cf7317;
+}
+
+.accent-active {
+    background: #cf7317 !important;
+    color: white !important;
+    border-color: #cf7317 !important;
+    box-shadow: 0 0 15px rgba(207, 115, 23, 0.4);
+}
+
+.highlight-accent {
+    color: #ff9d3f;
+    background: rgba(207, 115, 23, 0.25);
+    padding: 10px 24px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 157, 63, 0.5);
+    box-shadow: 0 0 25px rgba(207, 115, 23, 0.3);
+}
+
+.brightness-dim {
+    filter: brightness(0.55);
+}
+
+
+
+.input-glow:focus {
+    box-shadow: 0 0 15px rgba(207, 115, 23, 0.2);
+}
+
+.text-shadow-accent {
+    text-shadow: 0 0 10px rgba(207, 115, 23, 0.3);
+}
+
+.letter-spacing-wide {
+    letter-spacing: 0.5rem;
+}
+

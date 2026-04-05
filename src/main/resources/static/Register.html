@@ -1,0 +1,126 @@
+    
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chess Master - Đăng Ký</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/register.css" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cf7317",
+                        "background-light": "#f8f7f6",
+                        "background-dark": "#211911",
+                    },
+                    fontFamily: {
+                        "display": ["'Segoe UI'", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-dark font-display flex items-center justify-center p-4 bg-chessboard">
+      
+    <div class="w-full max-w-[420px] glass-effect rounded-xl shadow-2xl overflow-hidden p-8 flex flex-col gap-6 animate-fade-in">
+        <div class="text-center space-y-2">
+            <div class="flex justify-center mb-4">
+                <div class="w-20 h-20 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 transform hover:scale-105 transition-transform">
+                    <span class="material-symbols-outlined text-white text-5xl">chess</span>
+                </div>
+            </div>
+            <h1 class="text-white text-3xl font-bold tracking-tight uppercase">TẠO TÀI KHOẢN</h1>
+            <p class="text-white/60 text-sm">Bắt đầu hành trình kỳ thủ của bạn</p>
+        </div>
+
+        
+        
+        <form class="space-y-4" action="/register-submit" method="POST">
+            
+            
+            <div id="error-alert" class="hidden bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-center">
+                <p id="error-message" class="text-red-500 text-[11px] font-black uppercase tracking-widest"></p>
+            </div>
+
+            
+            <div class="flex flex-col gap-1.5">
+                <div class="flex items-center rounded-lg border border-white/10 bg-white/5 focus-within:border-primary/50 transition-colors h-14 px-4">
+                    <span class="material-symbols-outlined text-white/40 mr-3 text-[20px]">person</span>
+                    <input name="username" required class="bg-transparent border-none focus:ring-0 text-white w-full p-0 placeholder:text-white/30 text-base" placeholder="Tên đăng nhập" type="text"/>
+                </div>
+            </div>
+            
+            
+            <div class="flex flex-col gap-1.5">
+                <div class="flex items-center rounded-lg border border-white/10 bg-white/5 focus-within:border-primary/50 transition-colors h-14 px-4">
+                    <span class="material-symbols-outlined text-white/40 mr-3 text-[20px]">mail</span>
+                    <input name="email" required class="bg-transparent border-none focus:ring-0 text-white w-full p-0 placeholder:text-white/30 text-base" placeholder="Email" type="email"/>
+                </div>
+            </div>
+
+            
+            <div class="flex flex-col gap-1.5">
+                <div class="flex items-center rounded-lg border border-white/10 bg-white/5 focus-within:border-primary/50 transition-colors h-14 px-4">
+                    <span class="material-symbols-outlined text-white/40 mr-3 text-[20px]">lock</span>
+                    <input name="password" required class="bg-transparent border-none focus:ring-0 text-white w-full p-0 placeholder:text-white/30 text-base" placeholder="Mật khẩu" type="password"/>
+                </div>
+            </div>
+
+            
+            <div class="flex flex-col gap-1.5">
+                <div class="flex items-center rounded-lg border border-white/10 bg-white/5 focus-within:border-primary/50 transition-colors h-14 px-4">
+                    <span class="material-symbols-outlined text-white/40 mr-3 text-[20px]">shield_lock</span>
+                    <input name="confirm_password" required class="bg-transparent border-none focus:ring-0 text-white w-full p-0 placeholder:text-white/30 text-base" placeholder="Xác nhận mật khẩu" type="password"/>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-2 py-1">
+                <input class="mt-1 rounded border-white/10 bg-white/5 text-primary focus:ring-primary/50 focus:ring-offset-0" id="terms" type="checkbox" required/>
+                <label class="text-xs text-white/50 leading-snug cursor-pointer" for="terms">Tôi đồng ý với các Điều khoản dịch vụ và Chính sách bảo mật của Chess Master.</label>
+            </div>
+
+            <button class="w-full bg-primary hover:bg-[#b86514] text-white font-bold py-4 rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-[0.98] uppercase tracking-wide" type="submit">
+                Đăng ký ngay
+            </button>
+        </form>
+
+        <div class="text-center pt-2 border-t border-white/5">
+            <p class="text-white/60 text-sm">
+                Đã có tài khoản? 
+                <a class="text-primary hover:text-white font-semibold ml-1 transition-colors" 
+                   href="Login.html">Đăng nhập ngay</a>
+            </p>
+        </div>
+    </div>
+
+    
+    <script>
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorAlert = document.getElementById('error-alert');
+        const errorMessage = document.getElementById('error-message');
+
+        if (urlParams.has('error')) {
+            errorAlert.classList.remove('hidden');
+            const errorType = urlParams.get('error');
+            
+            if (errorType === 'mismatch') {
+                errorMessage.innerText = 'Mật khẩu xác nhận không khớp!';
+            } else if (errorType === 'exists') {
+                errorMessage.innerText = 'Tên đăng nhập đã tồn tại!';
+            } else {
+                errorMessage.innerText = 'Đã có lỗi xảy ra, vui lòng thử lại!';
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,118 @@
+    
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chess Master - Xem lại trận đấu</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.cdnfonts.com/css/segoe-ui-4" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-[#1e293b]">
+    <div class="fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,#334155_0%,#1e293b_100%)]"></div>
+    <div class="relative z-10 flex flex-col min-h-screen">
+        
+        
+        <header class="h-16 flex items-center justify-between px-8 bg-black/20 border-b border-white/5 backdrop-blur-md">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-[#cf7317] rounded-lg flex items-center justify-center shadow-lg">
+                    <span class="material-symbols-outlined text-white text-lg font-black">chess</span>
+                </div>
+                <h1 class="text-lg font-black italic uppercase tracking-tighter text-white/90">Chess Master</h1>
+            </div>
+            <button onclick="window.location.href='Dashboard.html'" class="flex items-center gap-2 px-5 py-2 glass rounded-full border border-white/10 hover:bg-white/10 transition-all text-white/70 group">
+                <span class="material-symbols-outlined text-sm font-black group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                <span class="text-[10px] font-black uppercase tracking-widest">Quay lại</span>
+            </button>
+        </header>
+
+        
+        
+        <main class="flex-1 flex items-center justify-center p-6">
+            <div class="glass max-w-2xl w-full p-6 rounded-2xl border border-white/10">
+                
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-black uppercase tracking-tight text-white">Xem lại trận đấu</h2>
+                        <p id="replay-info" class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1">Đang tải...</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                    
+                    <div class="lg:col-span-3">
+                        <div class="max-w-[320px] mx-auto">
+                            <div class="flex">
+                                
+                                <div class="w-5 flex flex-col text-[10px] font-bold text-white/50 pr-1">
+                                    <div class="flex-1 flex items-center justify-end">8</div>
+                                    <div class="flex-1 flex items-center justify-end">7</div>
+                                    <div class="flex-1 flex items-center justify-end">6</div>
+                                    <div class="flex-1 flex items-center justify-end">5</div>
+                                    <div class="flex-1 flex items-center justify-end">4</div>
+                                    <div class="flex-1 flex items-center justify-end">3</div>
+                                    <div class="flex-1 flex items-center justify-end">2</div>
+                                    <div class="flex-1 flex items-center justify-end">1</div>
+                                </div>
+                                
+                                <div class="flex-1 aspect-square bg-slate-800 rounded-xl overflow-hidden border border-white/10">
+                                    <div id="replay-board" class="grid grid-cols-8 grid-rows-8 w-full h-full"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex ml-5 mt-1">
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">a</div>
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">b</div>
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">c</div>
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">d</div>
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">e</div>
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">f</div>
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">g</div>
+                                <div class="flex-1 text-center text-[10px] font-bold text-white/50 uppercase">h</div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="flex items-center justify-center gap-2 mt-4">
+                            <button onclick="replayFirst()" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all border border-white/10">
+                                <span class="material-symbols-outlined text-white text-lg">first_page</span>
+                            </button>
+                            <button onclick="replayBack()" class="w-12 h-12 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all border border-white/10">
+                                <span class="material-symbols-outlined text-white text-2xl">navigate_before</span>
+                            </button>
+                            <div id="replay-move-counter" class="px-4 py-2 bg-black/30 rounded-lg text-white font-mono text-sm min-w-[80px] text-center">
+                                0 / 0
+                            </div>
+                            <button onclick="replayNext()" class="w-12 h-12 rounded-lg bg-[#cf7317] hover:bg-[#e07d1a] flex items-center justify-center transition-all shadow-lg shadow-[#cf7317]/20">
+                                <span class="material-symbols-outlined text-white text-2xl">navigate_next</span>
+                            </button>
+                            <button onclick="replayLast()" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all border border-white/10">
+                                <span class="material-symbols-outlined text-white text-lg">last_page</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    
+                    <div class="lg:col-span-2">
+                        <div class="glass rounded-xl overflow-hidden h-full flex flex-col border border-white/10">
+                            <div class="px-4 py-3 bg-white/5 border-b border-white/10">
+                                <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60">Lịch sử nước đi</h3>
+                            </div>
+                            <div id="replay-move-list" class="flex-1 overflow-y-auto p-3 max-h-[300px] text-sm">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="/js/Replay.js"></script>
+</body>
+</html>

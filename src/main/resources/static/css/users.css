@@ -1,0 +1,134 @@
+
+
+.admin-body {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.sidebar {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+}
+
+.brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #cf7317;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(207, 115, 23, 0.35);
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.75);
+    border-radius: 10px;
+    padding: 0.625rem 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.main-content {
+    min-height: 100vh;
+}
+
+.card-stat {
+    border: none;
+    border-radius: 18px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.2);
+}
+
+.card-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.card-success {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+.card-info {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+}
+
+.card-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.stat-icon {
+    font-size: 2.2rem;
+    opacity: 0.7;
+}
+
+.users-card {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.admin-users-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.admin-users-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.status-active {
+    background: rgba(22, 163, 74, 0.15);
+    color: #15803d;
+    border: 1px solid rgba(21, 128, 61, 0.2);
+}
+
+.status-locked {
+    background: rgba(239, 68, 68, 0.15);
+    color: #b91c1c;
+    border: 1px solid rgba(185, 28, 28, 0.2);
+}
+
+.btn-danger-soft {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+    border: 1px solid rgba(185, 28, 28, 0.2);
+}
+
+.btn-danger-soft:hover {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+}
+
+.btn-success-soft {
+    background: rgba(34, 197, 94, 0.15);
+    color: #15803d;
+    border: 1px solid rgba(21, 128, 61, 0.2);
+}
+
+.btn-success-soft:hover {
+    background: #16a34a;
+    color: #fff;
+    border-color: #16a34a;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 1rem !important;
+    }
+}
+

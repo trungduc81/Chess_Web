@@ -1,0 +1,500 @@
+   
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chess Master - Optimized Pro</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.cdnfonts.com/css/segoe-ui-4" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/game.css" rel="stylesheet">
+    
+</head>
+
+<body>
+    <div class="fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,#94a3b8_0%,#475569_100%)]"></div>
+    <div class="relative z-10 flex flex-col h-screen">
+        
+        <header>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-[#cf7317] rounded-lg flex items-center justify-center shadow-lg">
+                    <span class="material-symbols-outlined text-white text-lg">chess</span>
+                </div>
+                <h1 class="text-base font-black italic uppercase text-white/90 tracking-tight">Chess Master</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/90">
+                    <span class="opacity-40">User:</span>
+                    <span id="username-display" class="text-[#cf7317]">Loading...</span>
+                </div>
+                <button onclick="handleExitGame()" class="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors">Thoát</button>
+            </div>
+        </header>
+
+        
+        <main>
+            
+            <div class="board-side">
+                
+                <div class="player-card flex items-center justify-between glass px-4 py-2 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=AI" class="w-8 h-8 rounded-md bg-white/10">
+                        <span id="opponent-name" class="font-black text-xs text-white/90 tracking-tight">Đang chờ...</span>
+                    </div>
+                    <div id="opponent-timer" class="timer-box bg-slate-900/60 px-3 py-1 rounded-md border border-white/10 shadow-inner">
+                        <span class="text-lg font-mono font-black text-white">05:00</span>
+                    </div>
+                </div>
+
+                
+                <div class="relative board-container">
+                    <div class="absolute left-3 top-10 bottom-10 flex flex-col justify-around coordinate">
+                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                    </div>
+                    <div id="chess-board-grid"></div>
+                    <div class="absolute bottom-2 left-10 right-10 flex justify-around coordinate uppercase">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                </div>
+
+                
+                <div class="player-card flex items-center justify-between glass px-4 py-2 rounded-xl border-l-4 border-[#cf7317]">
+                    <div class="flex items-center gap-3">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-8 h-8 rounded-md border border-[#cf7317]/30">
+                        <span id="player-name" class="font-black text-xs text-white/90">Bạn</span>
+                    </div>
+                    <div id="player-timer" class="timer-box bg-slate-900/40 px-3 py-1 rounded-md border border-white/10">
+                        <span class="text-lg font-mono font-black text-white">05:00</span>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="chat-side">
+                
+                <div id="chat-box-container" class="flex-[2] flex flex-col glass rounded-2xl overflow-hidden relative">
+                    <div class="px-5 py-3 bg-white/10 border-b border-white/10">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-white/80">Trò chuyện</h3>
+                    </div>
+                    <div id="chat-content" class="flex-1 overflow-y-auto p-4 space-y-3 text-white text-xs scroll-smooth"></div>
+                    <div class="p-3 bg-slate-900/40 flex gap-2 border-t border-white/10">
+                        <input id="chat-input" onkeypress="if(event.key === 'Enter') sendChat()" class="flex-1 bg-white/5 border-none rounded-xl text-xs px-4 py-2.5 text-white outline-none focus:ring-1 focus:ring-[#cf7317]" placeholder="Nhập tin nhắn...">
+                        <button onclick="sendChat()" class="bg-[#cf7317] w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-[#cf7317]/20 hover:scale-105 active:scale-95 transition-all">
+                            <span class="material-symbols-outlined text-white text-base">send</span>
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div id="history-box-container" class="flex-1 flex flex-col glass rounded-2xl overflow-hidden">
+                    
+                    <div class="bg-white/10 border-b border-white/10">
+                        <table class="w-full text-xs font-mono text-center text-white/90 moves-table-layout">
+                            <colgroup>
+                                <col class="moves-table-col-small">
+                                <col>
+                                <col>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="py-2 text-[10px] table-header">#</th>
+                                    <th class="py-2 text-[10px] table-header">Trắng</th>
+                                    <th class="py-2 text-[10px] table-header">Đen</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    
+                    <div id="move-list-scroll" class="flex-1 overflow-y-auto">
+                        <table class="moves-wrap text-xs font-mono text-center text-white/90 moves-table-layout">
+                            <colgroup>
+                                <col class="moves-table-col-small">
+                                <col>
+                                <col>
+                            </colgroup>
+                            <tbody id="move-list" class="font-bold"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                
+                <div id="action-buttons-container" class="grid gap-2">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="offerDraw()" class="glass h-12 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all text-white flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-base">handshake</span> Xin hòa
+                        </button>
+                        <button onclick="resignGame()" class="bg-red-900/30 text-white h-12 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-800 transition-all border border-red-500/20 flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-base">flag</span> Đầu hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    
+    
+    <div id="game-result-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md hidden opacity-0 transition-opacity duration-500">
+        <div class="glass max-w-sm w-full p-8 rounded-[2.5rem] border-2 border-[#cf7317]/30 text-center transform scale-90 transition-transform duration-500" id="modal-content">
+            <div class="w-20 h-20 bg-[#cf7317] rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#cf7317]/40">
+                <span class="material-symbols-outlined text-white text-5xl">chess</span>
+            </div>
+            <h2 id="result-title" class="text-2xl font-black uppercase italic tracking-tighter text-white mb-2">Kết thúc</h2>
+            <p id="result-desc" class="text-white/60 text-sm font-bold mb-6"></p>
+            <div id="result-history" class="mb-6 text-left bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-white/70 hidden"></div>
+            <div class="space-y-3">
+                <button onclick="window.location.reload()" class="w-full h-14 bg-[#cf7317] hover:bg-[#e07d1a] text-white rounded-xl font-bold text-sm uppercase tracking-wide shadow-lg flex items-center justify-center gap-3">
+                    <span class="material-symbols-outlined">replay</span> Chơi ván mới
+                </button>
+                <button onclick="handleBackToHome()" class="w-full h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-sm uppercase tracking-wide border border-white/10">Quay lại trang chính</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="confirm-resign-modal" class="fixed inset-0 z-[101] flex items-center justify-center bg-black/60 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass max-w-sm w-full p-8 rounded-[2.5rem] border-2 border-[#cf7317]/30 text-center transform scale-90 transition-transform duration-300" id="confirm-modal-content">
+            <div class="w-16 h-16 bg-[#cf7317] rounded-lg flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#cf7317]/40">
+                <span class="material-symbols-outlined text-white text-3xl">chess</span>
+            </div>
+            <h2 class="text-xl font-black uppercase italic tracking-tighter text-white mb-3">Xác nhận đầu hàng</h2>
+            <p class="text-white/60 text-sm font-bold mb-6">Bạn chắc chắn muốn đầu hàng không?</p>
+            <div class="space-y-3">
+                <button onclick="confirmResign()" class="w-full h-12 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-sm uppercase tracking-wide shadow-lg flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">flag</span> Xác nhận đầu hàng
+                </button>
+                <button onclick="cancelResign()" class="w-full h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-sm uppercase tracking-wide border border-white/10">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    
+    
+    <div id="confirm-draw-modal" class="fixed inset-0 z-[101] flex items-center justify-center bg-black/60 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass max-w-sm w-full p-8 rounded-[2.5rem] border-2 border-[#cf7317]/30 text-center transform scale-90 transition-transform duration-300" id="confirm-draw-content">
+            <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/40">
+                <span class="material-symbols-outlined text-white text-3xl">handshake</span>
+            </div>
+            <h2 class="text-xl font-black uppercase italic tracking-tighter text-white mb-3">Xác nhận xin hòa</h2>
+            <p class="text-white/60 text-sm font-bold mb-6">Bạn muốn đề nghị hòa với đối thủ?</p>
+            <div class="space-y-3">
+                <button onclick="confirmDrawOffer()" class="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-sm uppercase tracking-wide shadow-lg flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">handshake</span> Gửi đề nghị hòa
+                </button>
+                <button onclick="cancelDrawOffer()" class="w-full h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-sm uppercase tracking-wide border border-white/10">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    
+    
+    <div id="receive-draw-modal" class="fixed inset-0 z-[101] flex items-center justify-center bg-black/60 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass max-w-sm w-full p-8 rounded-[2.5rem] border-2 border-[#cf7317]/30 text-center transform scale-90 transition-transform duration-300" id="receive-draw-content">
+            <div class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/40">
+                <span class="material-symbols-outlined text-white text-3xl">handshake</span>
+            </div>
+            <h2 class="text-xl font-black uppercase italic tracking-tighter text-white mb-3">Đề nghị hòa</h2>
+            <p id="draw-offer-text" class="text-white/60 text-sm font-bold mb-6">Đối thủ muốn hòa. Bạn đồng ý không?</p>
+            <div class="space-y-3">
+                <button onclick="acceptDraw()" class="w-full h-12 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-sm uppercase tracking-wide shadow-lg flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">check</span> Đồng ý hòa
+                </button>
+                <button onclick="declineDraw()" class="w-full h-12 bg-red-500/30 hover:bg-red-500/50 text-white rounded-xl font-bold text-sm uppercase tracking-wide border border-red-500/20">Từ chối</button>
+            </div>
+        </div>
+    </div>
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    
+    
+    
+    <script src="/js/stockfish.js"></script>
+    
+    
+    
+    <script src="/js/AIEngine.js"></script>
+    
+    
+    <script>
+        
+        
+        async function loadUserSession() {
+            
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('user') === 'false') {
+                document.getElementById('username-display').textContent = 'GUEST';
+                document.getElementById('player-name').textContent = 'GUEST';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/user/session');
+                const data = await response.json();
+                document.getElementById('username-display').textContent = data.username;
+                document.getElementById('player-name').textContent = data.username;
+            } catch (error) {
+                console.error('Error loading user session:', error);
+                document.getElementById('username-display').textContent = 'GUEST';
+                document.getElementById('player-name').textContent = 'GUEST';
+            }
+        }
+        
+        
+        function showGameResult(winnerName, reason) {
+            const modal = document.getElementById('game-result-modal');
+            const content = document.getElementById('modal-content');
+            document.getElementById('result-title').innerText = winnerName;
+            document.getElementById('result-desc').innerText = reason;
+            const historyBox = document.getElementById('result-history');
+            if (historyBox) {
+                historyBox.classList.add('hidden');
+                historyBox.innerHTML = '';
+            }
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.replace('scale-90', 'scale-100'); }, 10);
+        }
+
+        
+        
+        async function setResultHistoryDetail(result, reason, opponent) {
+            const historyBox = document.getElementById('result-history');
+            if (!historyBox) return;
+
+            
+            const isGuest = (typeof isGuestUser !== 'undefined' && isGuestUser) || 
+                (typeof isGuestMode === 'function' && isGuestMode());
+            if (isGuest) {
+                historyBox.innerHTML = `
+                    <div class="font-black uppercase tracking-widest text-yellow-400/80 mb-2">⚠️ Lịch sử đấu không được lưu</div>
+                    <div class="text-white/60 text-sm">Bạn đang chơi với tư cách khách.</div>
+                    <div class="text-white/60 text-sm">Đăng nhập để lưu lịch sử trận đấu.</div>
+                `;
+                historyBox.classList.remove('hidden');
+                return;
+            }
+
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            const opponentName = opponent || document.getElementById('opponent-name')?.innerText || 'N/A';
+            
+            historyBox.innerHTML = `
+                <div class="font-black uppercase tracking-widest text-white/50 mb-2">Lịch sử đã lưu</div>
+                <div>Thời gian: <span class="text-white">${dateStr}</span></div>
+                <div>Đối thủ: <span class="text-white">${opponentName}</span></div>
+                <div>Kết quả: <span class="text-white">${result || 'N/A'}</span></div>
+                <div>Lý do: <span class="text-white">${reason || 'N/A'}</span></div>
+            `;
+            historyBox.classList.remove('hidden');
+        }
+
+        
+        function showConfirmResignModal() {
+            const modal = document.getElementById('confirm-resign-modal');
+            const content = document.getElementById('confirm-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.replace('scale-90', 'scale-100'); }, 10);
+        }
+
+        function hideConfirmResignModal() {
+            const modal = document.getElementById('confirm-resign-modal');
+            const content = document.getElementById('confirm-modal-content');
+            modal.classList.add('opacity-0');
+            content.classList.replace('scale-100', 'scale-90');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        
+        
+        
+        function offerDraw() {
+            if (isAIMode) {
+                
+                alert('Máy không chấp nhận hòa!');
+                return;
+            }
+            showConfirmDrawModal();
+        }
+
+        function showConfirmDrawModal() {
+            const modal = document.getElementById('confirm-draw-modal');
+            const content = document.getElementById('confirm-draw-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.replace('scale-90', 'scale-100'); }, 10);
+        }
+
+        function hideConfirmDrawModal() {
+            const modal = document.getElementById('confirm-draw-modal');
+            const content = document.getElementById('confirm-draw-content');
+            modal.classList.add('opacity-0');
+            content.classList.replace('scale-100', 'scale-90');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function confirmDrawOffer() {
+            hideConfirmDrawModal();
+            if (typeof isConnected !== 'undefined' && isConnected()) {
+                stompClient.send("/app/draw-offer/" + roomCode, {}, JSON.stringify({
+                    playerId: sessionStorage.getItem('myPlayerId'),
+                    action: 'draw_offer'
+                }));
+                addChatMessage('Hệ thống', 'Bạn đã gửi đề nghị hòa...', true);
+            }
+        }
+
+        function cancelDrawOffer() {
+            hideConfirmDrawModal();
+        }
+
+        function showReceiveDrawModal(opponentName) {
+            const modal = document.getElementById('receive-draw-modal');
+            const content = document.getElementById('receive-draw-content');
+            document.getElementById('draw-offer-text').innerText = `${opponentName} muốn hòa. Bạn đồng ý không?`;
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.replace('scale-90', 'scale-100'); }, 10);
+        }
+
+        function hideReceiveDrawModal() {
+            const modal = document.getElementById('receive-draw-modal');
+            const content = document.getElementById('receive-draw-content');
+            modal.classList.add('opacity-0');
+            content.classList.replace('scale-100', 'scale-90');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function acceptDraw() {
+            hideReceiveDrawModal();
+            if (typeof isConnected !== 'undefined' && isConnected()) {
+                stompClient.send("/app/draw-accept/" + roomCode, {}, JSON.stringify({
+                    playerId: sessionStorage.getItem('myPlayerId'),
+                    action: 'draw_accept',
+                    pgn: typeof chess !== 'undefined' ? chess.pgn() : null
+                }));
+            }
+        }
+
+        function declineDraw() {
+            hideReceiveDrawModal();
+            if (typeof isConnected !== 'undefined' && isConnected()) {
+                stompClient.send("/app/draw-decline/" + roomCode, {}, JSON.stringify({
+                    playerId: sessionStorage.getItem('myPlayerId'),
+                    action: 'draw_decline'
+                }));
+                addChatMessage('Hệ thống', 'Bạn đã từ chối đề nghị hòa.', true);
+            }
+        }
+
+        
+        
+        
+        function sendChat() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            input.value = '';
+            
+            if (isAIMode) {
+                
+                addChatMessage(myDisplayName || 'Bạn', message, false);
+                return;
+            }
+            
+            if (typeof isConnected !== 'undefined' && isConnected()) {
+                stompClient.send("/app/chat/" + roomCode, {}, JSON.stringify({
+                    playerId: sessionStorage.getItem('myPlayerId'),
+                    sender: myDisplayName || 'Khách',
+                    message: message
+                }));
+            } else {
+                addChatMessage('Bạn', message, false);
+            }
+        }
+
+        function addChatMessage(sender, message, isSystem = false) {
+            const chatContent = document.getElementById('chat-content');
+            if (!chatContent) return;
+            
+            const msgDiv = document.createElement('div');
+            if (isSystem) {
+                msgDiv.className = 'text-center text-white/40 italic text-[10px]';
+                msgDiv.innerText = message;
+            } else {
+                const isMe = sender === (myDisplayName || 'Bạn') || sender === sessionStorage.getItem('myPlayerId');
+                msgDiv.className = `p-2 rounded-lg ${isMe ? 'bg-[#cf7317]/20 ml-4' : 'bg-white/10 mr-4'}`;
+                msgDiv.innerHTML = `
+                    <div class="text-[10px] font-bold ${isMe ? 'text-[#cf7317]' : 'text-white/60'}">${sender}</div>
+                    <div class="text-white/90">${message}</div>
+                `;
+            }
+            chatContent.appendChild(msgDiv);
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        
+        function confirmResign() {
+            hideConfirmResignModal();
+            if (isAIMode) {
+                showGameResult("Thua", "Bạn đã đầu hàng");
+                if (typeof saveMatchHistoryOnce === 'function') {
+                    const reasonWithAI = 'Đầu hàng|AI:' + (typeof aiDifficulty !== 'undefined' ? aiDifficulty : 'medium');
+                    saveMatchHistoryOnce("Thua", reasonWithAI, 'Máy');
+                }
+                if (typeof setResultHistoryDetail === 'function') {
+                    setResultHistoryDetail("Thua", "Đầu hàng");
+                }
+            } else if (typeof isConnected !== 'undefined' && isConnected()) {
+                stompClient.send("/app/resign/" + roomCode, {}, JSON.stringify({
+                    playerId: sessionStorage.getItem('myPlayerId'),
+                    pgn: typeof chess !== 'undefined' ? chess.pgn() : null
+                }));
+            }
+        }
+
+        function cancelResign() {
+            hideConfirmResignModal();
+        }
+
+        
+        function updateTimerDisplay(elementId, seconds) {
+            const timerBox = document.getElementById(elementId);
+            if (!timerBox) return;
+            const timerSpan = timerBox.querySelector('span');
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerSpan.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        
+        function isGuestMode() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('user') === 'false';
+        }
+
+        
+        function handleExitGame() {
+            if (isGuestMode()) {
+                window.location.href = 'Lobby.html?user=false';
+                return;
+            }
+            window.location.href = 'Dashboard.html';
+        }
+
+        function handleBackToHome() {
+            handleExitGame();
+        }
+        
+        
+        window.addEventListener('DOMContentLoaded', loadUserSession);
+    </script>
+    <script src="/js/Game.js"></script>
+</body>
+</html>
+

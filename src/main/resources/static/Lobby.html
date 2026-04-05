@@ -1,0 +1,99 @@
+    
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chess Master - Sảnh Chờ</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/lobby.css" rel="stylesheet">
+</head>
+
+<body class="bg-chessboard flex items-center justify-center p-4 relative">
+    
+    <div class="fixed inset-0 bg-black/50 z-0"></div>
+
+    <div class="relative z-10 w-full max-w-5xl animate-fade-in">
+        
+        
+        <div class="flex items-center justify-between mb-10 px-2">
+            <div class="flex items-center gap-4">
+                <div class="space-y-1">
+                    <h2 id="lobby-title" class="text-white text-4xl font-black uppercase italic tracking-tighter">Chế độ: Khách</h2>
+                    <p id="lobby-desc" class="text-white/60 text-xs uppercase tracking-[0.15em] font-bold">Lịch sử đấu sẽ không được lưu</p>
+                </div>
+            </div>
+            <a id="register-link" href="/Register.html" class="register-highlight text-sm font-black uppercase tracking-wider">
+                Đăng ký để lưu lịch sử đấu
+            </a>
+        </div>
+
+        
+        <div id="main-grid" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
+            
+            
+            
+            <div class="glass rounded-[2rem] p-10 flex flex-col border border-white/10 shadow-2xl h-full">
+                <div class="border-b border-white/10 pb-8 text-center mb-8">
+                    <h3 class="text-white text-3xl font-black uppercase tracking-tight">Đấu với máy</h3>
+                </div>
+
+                <div class="flex-1 space-y-6">
+                    <label class="block text-white/50 text-[12px] font-black uppercase tracking-[0.2em] text-center">Chọn mức độ thử thách</label>
+                    <div class="grid grid-cols-1 gap-3" id="difficulty-selector">
+                        <button onclick="selectDifficulty(this)" data-value="easy" class="option-btn active flex items-center justify-between p-6 rounded-2xl border border-white/10 text-white/70 hover:bg-white/5 transition-all">
+                            <div class="text-left font-bold text-lg">Nhập môn</div>
+                        </button>
+                        <button onclick="selectDifficulty(this)" data-value="medium" class="option-btn flex items-center justify-between p-6 rounded-2xl border border-white/10 text-white/70 hover:bg-white/5 transition-all">
+                            <div class="text-left font-bold text-lg">Kiện tướng</div>
+                        </button>
+                        <button onclick="selectDifficulty(this)" data-value="hard" class="option-btn flex items-center justify-between p-6 rounded-2xl border border-white/10 text-white/70 hover:bg-white/5 transition-all">
+                            <div class="text-left font-bold text-lg">Đại kiện tướng</div>
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="startAiGame()" class="mt-10 w-full bg-[#cf7317] hover:bg-[#e07d1a] text-white font-black py-6 rounded-2xl shadow-xl shadow-[#cf7317]/30 transition-all uppercase text-sm tracking-[0.25em]">
+                    Bắt đầu trận đấu
+                </button>
+            </div>
+
+            
+            
+            <div id="friend-section" class="glass rounded-[2rem] p-10 flex flex-col border border-white/10 shadow-2xl h-full">
+                <div class="border-b border-white/10 pb-8 text-center mb-8">
+                    <h3 class="text-white text-3xl font-black uppercase tracking-tight">Chơi cùng bạn bè</h3>
+                </div>
+
+                <div class="flex-1 space-y-6">
+                    <label class="block text-white/50 text-[12px] font-black uppercase tracking-[0.2em] text-center">Nhập mã phòng chơi</label>
+                    
+                    <div class="flex flex-col justify-center h-[260px] space-y-4">
+                        <input type="text" id="guest-room-input" maxlength="6" placeholder="MÃ 6 SỐ" 
+                               class="w-full bg-black/30 border-2 border-white/10 rounded-3xl py-10 text-white text-center text-5xl font-black tracking-[0.5rem] focus:ring-2 focus:ring-[#cf7317] outline-none transition-all placeholder:text-3xl placeholder:text-white/20 shadow-inner">
+                        
+                        <p class="text-white/60 text-xs text-center font-bold italic">
+                            Sử dụng mã được chia sẻ từ bạn bè để vào phòng
+                        </p>
+                    </div>
+                </div>
+                
+                <button onclick="joinGuestRoom()" class="w-full bg-[#cf7317] hover:bg-[#e07d1a] text-white font-black py-6 rounded-2xl shadow-xl shadow-[#cf7317]/30 transition-all uppercase text-sm tracking-[0.25em]">
+                    Vào phòng ngay
+                </button>
+            </div>
+        </div>
+
+        
+        <div class="mt-14 text-center">
+            <button id="back-btn" onclick="handleBack()" class="text-white/50 hover:text-white text-sm font-black uppercase tracking-[0.2em] py-4 px-16 rounded-full hover:bg-white/5 transition-all border border-white/10">
+                Trở lại trang chủ
+            </button>
+        </div>
+    </div>
+
+    <script src="/js/Lobby.js"></script>
+</body>
+</html>
+

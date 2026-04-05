@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chess Master - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.cdnfonts.com/css/segoe-ui-4" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=swap" rel="stylesheet"/>
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body class="bg-[#1e293b]">
+    <div class="fixed inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,#334155_0%,#1e293b_100%)]"></div>
+    <div class="relative z-10 flex flex-col min-h-screen">
+        <header class="h-16 flex items-center justify-between px-8 bg-black/20 border-b border-white/5 backdrop-blur-md">
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-[#cf7317] rounded-lg flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-white text-lg font-black">chess</span></div>
+                    <h1 class="text-lg font-black italic uppercase tracking-tighter text-white/90">Chess Master</h1>
+                </div>
+                <div class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-white/90">
+                    <span class="opacity-40">Tài khoản :</span>
+                    <span id="username-display" class="text-[#cf7317]">Loading...</span>
+                </div>
+            </div>
+            <button onclick="logout()" class="flex items-center gap-2 px-5 py-2 glass rounded-full border border-red-500/30 hover:bg-red-500/10 transition-all text-red-500 group">
+                <span class="text-[10px] font-black uppercase tracking-widest">Đăng xuất</span>
+                <span class="material-symbols-outlined text-sm font-black group-hover:translate-x-1 transition-transform">logout</span>
+            </button>
+        </header>
+
+        <main class="flex-1 p-8 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div class="lg:col-span-1 space-y-4">
+                <section class="glass p-8 rounded-[2.5rem] text-center flex flex-col items-center gap-6 border-t-4 border-[#cf7317]">
+                    <h2 class="text-xs font-black uppercase tracking-[0.2em] text-white/40">Phòng đấu</h2>
+                    <div class="w-full space-y-4">
+                        <input type="text" id="room-code-input" maxlength="6" placeholder="------" class="room-input w-full bg-black/40 border-2 border-white/5 rounded-2xl py-6 text-4xl font-black text-[#cf7317] text-center outline-none transition-all placeholder:text-white/5">
+                        <div class="space-y-2">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-white/30">Thời gian (Phút)</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="selectTime(5, this)" class="time-btn active py-2 rounded-lg border border-white/5 bg-white/5 text-[10px] font-black text-white/60 transition-all">5m</button>
+                                <button onclick="selectTime(10, this)" class="time-btn py-2 rounded-lg border border-white/5 bg-white/5 text-[10px] font-black text-white/60 transition-all">10m</button>
+                                <button onclick="selectTime(15, this)" class="time-btn py-2 rounded-lg border border-white/5 bg-white/5 text-[10px] font-black text-white/60 transition-all">15m</button>
+                            </div>
+                        </div>
+                        <p id="error-msg" class="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-0 transition-opacity">Vui lòng nhập mã</p>
+                    </div>
+                    <div class="w-full space-y-3">
+                        <button onclick="generateRoomCode()" class="w-full h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black uppercase tracking-widest transition-all border border-white/10">Sinh mã phòng</button>
+                        <button onclick="joinRoom()" class="w-full h-14 bg-[#cf7317] hover:bg-[#e07d1a] text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-[#cf7317]/20 flex items-center justify-center gap-3">
+                            <span class="material-symbols-outlined text-base font-black">login</span>Vào phòng ngay
+                        </button>
+                    </div>
+                </section>
+                <button onclick="window.location.href='Lobby.html?user=true'" class="glass w-full h-16 rounded-2xl flex items-center justify-center gap-4 hover:bg-white/10 transition-all group">
+                    <div class="w-10 h-10 bg-[#cf7317]/10 rounded-xl flex items-center justify-center group-hover:bg-[#cf7317] transition-colors"><span class="material-symbols-outlined text-[#cf7317] group-hover:text-white font-black">smart_toy</span></div>
+                    <span class="text-xs font-black uppercase tracking-widest">Đấu với máy</span>
+                </button>
+            </div>
+            
+            <div class="lg:col-span-2">
+                <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                    <div class="glass rounded-2xl p-5 border border-white/5">
+                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Số ván đấu</p>
+                        
+                        <p id="total-matches" class="mt-2 text-3xl font-black text-white/90">0</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5 border border-white/5">
+                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Số ván thắng</p>
+                        
+                        <p id="total-wins" class="mt-2 text-3xl font-black text-green-400">0</p>
+                    </div>
+                    <div class="glass rounded-2xl p-5 border border-white/5">
+                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/40">Tỉ lệ thắng</p>
+                        
+                        <p id="win-rate" class="mt-2 text-3xl font-black text-[#cf7317]">0%</p>
+                    </div>
+                </section>
+
+                <section class="glass rounded-[2.5rem] border border-white/5 p-6 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div>
+                            <h2 class="text-xs font-black uppercase tracking-[0.08em] text-white/50">Biểu đồ tỉ lệ thắng</h2>
+                            <p class="mt-2 text-sm text-white/60">Theo tổng số ván đã chơi của bạn</p>
+                            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                                <div class="bg-white/5 rounded-xl px-4 py-3 border border-white/10">
+                                    <p class="text-[10px] uppercase tracking-widest text-white/40">Số ván thắng</p>
+                                    <p id="chart-total-wins" class="mt-1 text-xl font-black text-green-400">0</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl px-4 py-3 border border-white/10">
+                                    <p class="text-[10px] uppercase tracking-widest text-white/40">Tổng số ván</p>
+                                    <p id="chart-total-matches" class="mt-1 text-xl font-black text-white/90">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-center md:justify-end">
+                            <div id="winrate-chart" class="winrate-chart" style="--win-angle: 0deg;">
+                                <div class="winrate-chart-inner">
+                                    <p id="chart-win-rate" class="text-2xl font-black text-[#cf7317]">0.0%</p>
+                                    <p class="text-[10px] uppercase tracking-widest text-white/40">Tỉ lệ thắng</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="glass rounded-[2.5rem] overflow-hidden flex flex-col border border-white/5">
+                    <div class="px-8 py-5 bg-white/5 border-b border-white/5">
+                        <h2 class="text-xs font-black uppercase tracking-[0.3em] text-white/50">Lịch sử trận đấu</h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs font-black uppercase tracking-wide text-white/40 border-b border-white/5">
+                                    <th class="px-6 py-4">Thời gian</th>
+                                    <th class="px-6 py-4">Đối thủ</th>
+                                    <th class="px-6 py-4 text-center">Kết quả</th>
+                                    <th class="px-6 py-4">Lý do</th>
+                                    <th class="px-6 py-4 text-center">Xem lại</th>
+                                </tr>
+                            </thead>
+                            <tbody id="match-history-tbody" class="text-sm font-semibold text-white/80">
+                                
+                                <tr>
+                                    <td colspan="5" class="px-6 py-10 text-center opacity-30 italic">Đang tải lịch sử...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="match-pagination" class="hidden px-6 py-4 border-t border-white/5 bg-black/10 flex items-center justify-between gap-3 flex-wrap">
+                        <div id="match-pagination-info" class="text-xs text-white/50">Trang 1/1</div>
+                        <div class="flex items-center gap-2">
+                            <button id="match-prev-btn" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 text-xs font-black uppercase tracking-wide text-white/70 hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed">Trước</button>
+                            <span id="match-page-indicator" class="text-xs text-white/60 min-w-16 text-center">1 / 1</span>
+                            <button id="match-next-btn" type="button" class="px-3 py-1.5 rounded-lg border border-white/15 text-xs font-black uppercase tracking-wide text-white/70 hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed">Sau</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/Dashboard.js"></script>
+    <script>
+    
+    function logout() {
+        fetch('/logout', {
+            method: 'POST',
+            credentials: 'same-origin'
+        })
+        .then(() => {
+            window.location.href = 'Login.html';
+        })
+        .catch(() => {
+            window.location.href = 'Login.html';
+        });
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+ 
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ChessWeb Admin - Dashboard</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/users.css">
+    <style>
+        
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 1050;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .modal-panel {
+            background: #fff;
+            border-radius: 20px;
+            width: 95%; max-width: 720px;
+            max-height: 85vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+            transform: translateY(20px);
+            transition: transform 0.25s ease;
+        }
+        .modal-overlay.show .modal-panel { transform: translateY(0); }
+
+        .modal-header-custom {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-body-custom {
+            flex: 1; overflow-y: auto; padding: 1rem 1.5rem;
+        }
+
+        .match-row { transition: background 0.15s ease; cursor: pointer; border-radius: 10px; }
+        .match-row:hover { background: #f1f5f9; }
+
+        .result-badge {
+            display: inline-block; padding: 2px 10px; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .result-badge.win   { background: rgba(22,163,74,0.12); color: #15803d; }
+        .result-badge.lose  { background: rgba(239,68,68,0.12); color: #b91c1c; }
+        .result-badge.draw  { background: rgba(59,130,246,0.12); color: #1d4ed8; }
+
+        
+        .modal-panel.replay-panel { max-width: 580px; }
+
+        .replay-board-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+        }
+        .replay-board-grid .sq {
+            display: flex; align-items: center; justify-content: center;
+        }
+        .replay-board-grid .sq img {
+            width: 85%; height: 85%; object-fit: contain;
+        }
+        .sq-light { background: #f0d9b5; }
+        .sq-dark  { background: #b58863; }
+
+        .replay-controls {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            margin-top: 12px;
+        }
+        .replay-controls button {
+            width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e2e8f0;
+            background: #f8fafc; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .replay-controls button:hover { background: #e2e8f0; }
+        .replay-controls .ctrl-next { background: #cf7317; border-color: #cf7317; color: #fff; }
+        .replay-controls .ctrl-next:hover { background: #b5640f; }
+        .replay-counter {
+            min-width: 70px; text-align: center; font-family: monospace;
+            font-size: 0.85rem; padding: 6px 12px; background: #f1f5f9; border-radius: 8px;
+        }
+
+        .replay-move-table {
+            max-height: 220px; overflow-y: auto;
+            font-family: monospace; font-size: 0.8rem;
+        }
+        .replay-move-table td { padding: 3px 8px; cursor: pointer; border-radius: 4px; }
+        .replay-move-table td:hover { background: #f1f5f9; }
+        .replay-move-table td.active-move { background: rgba(207,115,23,0.18); color: #cf7317; font-weight: 700; }
+
+        .btn-view-matches {
+            background: rgba(59,130,246,0.12); color: #1d4ed8; border: 1px solid rgba(29,78,216,0.2);
+            font-size: 0.8rem; padding: 4px 12px; border-radius: 8px; cursor: pointer;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .btn-view-matches:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+    </style></head>
+<body class="admin-body">
+<div class="container-fluid">
+    <div class="row g-0">
+        
+        
+        <nav class="col-lg-2 col-md-3 d-none d-md-block sidebar py-4 px-3">
+            <div class="sidebar-brand mb-4">
+                <div class="brand-icon"><i class="fas fa-chess"></i></div>
+                <div>
+                    <h4 class="mb-0">ChessAdmin</h4>
+                    <small class="text-light-emphasis">Bảng điều khiển</small>
+                </div>
+            </div>
+            <ul class="nav flex-column gap-1">
+                <li class="nav-item"><a id="nav-overview" class="nav-link active" href="#"><i class="fas fa-home me-2"></i> Tổng quan</a></li>
+                <li class="nav-item"><a id="nav-users" class="nav-link" href="#users-section"><i class="fas fa-users me-2"></i> Người dùng</a></li>
+            </ul>
+        </nav>
+
+        
+        <main class="col-lg-10 col-md-9 ms-sm-auto main-content p-4 p-lg-5">
+            
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div>
+                    <h2 id="page-title" class="mb-1 fw-bold">Quản trị hệ thống</h2>
+                    <p id="page-subtitle" class="text-secondary mb-0">Theo dõi thống kê và quản lý trạng thái tài khoản người chơi</p>
+                </div>
+                <button id="refresh-btn" class="btn btn-outline-primary px-4" type="button">
+                    <i class="fas fa-rotate-right me-2"></i>Làm mới dữ liệu
+                </button>
+            </div>
+
+            
+            
+            <div id="overview-section" class="row g-4 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-stat card-primary text-white shadow">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Tổng ván đấu</h6>
+                                <h2 id="total-matches" class="mb-0">--</h2>
+                            </div>
+                            <i class="fas fa-chess-board stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-stat card-success text-white shadow">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Hôm nay</h6>
+                                <h2 id="today-matches" class="mb-0">--</h2>
+                            </div>
+                            <i class="fas fa-history stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-stat card-info text-white shadow">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Người chơi</h6>
+                                <h2 id="total-users" class="mb-0">--</h2>
+                            </div>
+                            <i class="fas fa-user-friends stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card card-stat card-warning text-white shadow">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1">Tổng ván (Guest + User)</h6>
+                                <h2 id="total-matches-all" class="mb-0">--</h2>
+                            </div>
+                            <i class="fas fa-globe stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div id="recent-matches-section" class="card shadow-sm border-0 users-card mb-4">
+                <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-clock-rotate-left me-2 text-primary"></i>Các trận đấu gần nhất</h5>
+                    <span id="recent-matches-count" class="badge rounded-pill text-bg-secondary">0 trận</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle admin-users-table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Trắng</th>
+                                    <th>Đen</th>
+                                    <th style="width: 200px;">Kết quả</th>
+                                    <th style="width: 160px;">Thời gian</th>
+                                    <th style="width: 100px;">Xem lại</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-matches-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        Đang tải dữ liệu...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            
+            
+            <div id="users-section" class="card shadow-sm border-0 users-card">
+                <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 fw-bold">Danh sách kỳ thủ</h5>
+                    <span id="users-count" class="badge rounded-pill text-bg-secondary">0 người</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle admin-users-table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 80px;">ID</th>
+                                    <th>Username</th>
+                                    <th style="width: 140px;">
+                                     
+                                        <button id="sort-win-rate-btn" class="btn btn-link p-0 text-decoration-none fw-bold" type="button" title="Sắp xếp theo tỉ lệ thắng">
+                                            Win rate <i id="win-rate-sort-icon" class="fas fa-sort-amount-down ms-1"></i>
+                                        </button>
+                                    </th>
+                                    <th style="width: 180px;">Email</th>
+                                    <th style="width: 140px;">Trạng thái</th>
+                                    <th style="width: 120px;">Ván đấu</th>
+                                    <th style="width: 180px;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        Đang tải dữ liệu...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="top-players-section" class="card shadow-sm border-0 users-card mt-4">
+                <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-trophy me-2 text-warning"></i>Top 5 tỉ lệ thắng cao nhất</h5>
+                    <span id="top-players-count" class="badge rounded-pill text-bg-secondary">0 người</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle admin-users-table mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 90px;">Hạng</th>
+                                    <th>Username</th>
+                                    <th style="width: 140px;">Win rate</th>
+                                    <th style="width: 140px;">Số ván đấu</th>
+                                    <th style="width: 140px;">Số ván thắng</th>
+                                </tr>
+                            </thead>
+                            <tbody id="top-players-tbody">
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        Đang tải dữ liệu...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+
+<div id="matches-modal" class="modal-overlay" onclick="if(event.target===this)closeMatchesModal()">
+    <div class="modal-panel">
+        <div class="modal-header-custom">
+            <div>
+                <h5 class="mb-0 fw-bold" id="matches-modal-title">Lịch sử ván đấu</h5>
+                <small class="text-secondary" id="matches-modal-subtitle"></small>
+            </div>
+            <button onclick="closeMatchesModal()" class="btn-close"></button>
+        </div>
+        <div class="modal-body-custom" id="matches-modal-body">
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                Đang tải...
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="replay-modal" class="modal-overlay" onclick="if(event.target===this)closeReplayModal()">
+    <div class="modal-panel replay-panel">
+        <div class="modal-header-custom">
+            <div>
+                <h5 class="mb-0 fw-bold" id="replay-modal-title">Xem lại trận đấu</h5>
+                <small class="text-secondary" id="replay-modal-subtitle"></small>
+            </div>
+            <button onclick="closeReplayModal()" class="btn-close"></button>
+        </div>
+        <div class="modal-body-custom">
+            
+            <div style="max-width: 360px; margin: 0 auto;">
+                <div class="replay-board-grid" id="admin-replay-board"></div>
+                <div class="replay-controls">
+                    <button onclick="adminReplayFirst()" title="Đầu"><i class="fas fa-angle-double-left"></i></button>
+                    <button onclick="adminReplayBack()" title="Lùi"><i class="fas fa-angle-left"></i></button>
+                    <div class="replay-counter" id="admin-replay-counter">0 / 0</div>
+                    <button class="ctrl-next" onclick="adminReplayNext()" title="Tiến"><i class="fas fa-angle-right"></i></button>
+                    <button onclick="adminReplayLast()" title="Cuối"><i class="fas fa-angle-double-right"></i></button>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <h6 class="fw-bold mb-2" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:#64748b;">Lịch sử nước đi</h6>
+                <div class="replay-move-table" id="admin-replay-moves"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="status-toast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div id="status-toast-body" class="toast-body"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+    
+    
+    
+    
+    const usersTbody = document.getElementById('users-tbody');
+    const usersCount = document.getElementById('users-count');
+    const topPlayersSection = document.getElementById('top-players-section');
+    const topPlayersTbody = document.getElementById('top-players-tbody');
+    const topPlayersCount = document.getElementById('top-players-count');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const overviewSection = document.getElementById('overview-section');
+    const recentMatchesSection = document.getElementById('recent-matches-section');
+    const usersSection = document.getElementById('users-section');
+    const navOverview = document.getElementById('nav-overview');
+    const navUsers = document.getElementById('nav-users');
+    const pageTitle = document.getElementById('page-title');
+    const pageSubtitle = document.getElementById('page-subtitle');
+    const sortWinRateBtn = document.getElementById('sort-win-rate-btn');
+    const winRateSortIcon = document.getElementById('win-rate-sort-icon');
+    const statusToastEl = document.getElementById('status-toast');
+    const statusToastBody = document.getElementById('status-toast-body');
+    let usersCache = [];
+    let winRateSortDirection = 'desc';
+    
+    const statusToast = new bootstrap.Toast(statusToastEl, { delay: 2200 });
+
+    
+    function setActiveNav(target) {
+        navOverview.classList.remove('active');
+        navUsers.classList.remove('active');
+
+        if (target === 'users') {
+            navUsers.classList.add('active');
+            return;
+        }
+
+        navOverview.classList.add('active');
+    }
+
+    
+    
+    function switchView(view) {
+        if (view === 'users') {
+            overviewSection.classList.add('d-none');
+            recentMatchesSection.classList.add('d-none');
+            usersSection.classList.remove('d-none');
+            topPlayersSection.classList.remove('d-none');
+            pageTitle.textContent = 'Quản lý người dùng';
+            pageSubtitle.textContent = 'Khóa/mở khóa tài khoản và theo dõi trạng thái hoạt động';
+            usersSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setActiveNav('users');
+            return;
+        }
+
+        overviewSection.classList.remove('d-none');
+        recentMatchesSection.classList.remove('d-none');
+        usersSection.classList.add('d-none');
+        topPlayersSection.classList.add('d-none');
+        pageTitle.textContent = 'Quản trị hệ thống';
+        pageSubtitle.textContent = 'Theo dõi thống kê và quản lý trạng thái tài khoản người chơi';
+        setActiveNav('overview');
+    }
+
+    
+    
+    function showToast(message, type = 'success') {
+        statusToastBody.textContent = message;
+        statusToastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-secondary');
+        statusToastEl.classList.add(type === 'error' ? 'text-bg-danger' : 'text-bg-success');
+        statusToast.show();
+    }
+
+    
+    function setStatsLoading() {
+        document.getElementById('total-matches').textContent = '--';
+        document.getElementById('today-matches').textContent = '--';
+        document.getElementById('total-users').textContent = '--';
+        document.getElementById('total-matches-all').textContent = '--';
+    }
+
+    
+    function setUsersLoading() {
+        usersTbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Đang tải dữ liệu...
+                </td>
+            </tr>
+        `;
+    }
+
+    function setTopPlayersLoading() {
+        topPlayersTbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-5 text-muted">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Đang tải dữ liệu...
+                </td>
+            </tr>
+        `;
+    }
+
+    function getUserWinRate(user) {
+        const value = Number(user?.win_rate ?? user?.winRate ?? 0);
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    function updateWinRateSortIcon() {
+        if (!winRateSortIcon) return;
+        winRateSortIcon.className = winRateSortDirection === 'asc'
+            ? 'fas fa-sort-amount-up ms-1'
+            : 'fas fa-sort-amount-down ms-1';
+    }
+
+    function sortUsersByWinRate(direction = 'desc') {
+        winRateSortDirection = direction;
+        usersCache.sort((a, b) => {
+            const diff = getUserWinRate(a) - getUserWinRate(b);
+            if (diff !== 0) {
+                return direction === 'asc' ? diff : -diff;
+            }
+
+            const aName = String(a?.username || '').toLowerCase();
+            const bName = String(b?.username || '').toLowerCase();
+            return aName.localeCompare(bName);
+        });
+        updateWinRateSortIcon();
+        renderUsers(usersCache);
+    }
+
+    
+    
+    
+    function renderUsers(users) {
+        usersCount.textContent = `${users.length} người`;
+
+        if (!users || users.length === 0) {
+            usersTbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">Chưa có người dùng nào</td></tr>';
+            return;
+        }
+
+        usersTbody.innerHTML = users.map(user => {
+            const isActive = !!user.active;
+            const winRateValue = getUserWinRate(user);
+            const badge = isActive
+                ? '<span class="badge status-active">Hoạt động</span>'
+                : '<span class="badge status-locked">Đã khóa</span>';
+
+            const actionButton = isActive
+                ? `<button onclick="lockUser(${user.id})" class="btn btn-sm btn-danger-soft"><i class="fas fa-lock me-1"></i>Khóa</button>`
+                : `<button onclick="unlockUser(${user.id})" class="btn btn-sm btn-success-soft"><i class="fas fa-lock-open me-1"></i>Mở khóa</button>`;
+
+            return `
+                <tr>
+                    <td class="fw-semibold">#${user.id}</td>
+                    <td class="fw-medium">${user.username || '-'}</td>
+                    <td><span class="badge rounded-pill text-bg-primary">${winRateValue.toFixed(1)}%</span></td>
+                    <td class="text-muted">${user.email || '-'}</td>
+                    <td>${badge}</td>
+                    <td><button onclick="viewUserMatches(${user.id}, '${user.username || ''}')" class="btn-view-matches"><i class="fas fa-chess-board me-1"></i>Xem</button></td>
+                    <td>${actionButton}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function renderTopPlayers(players) {
+        const safePlayers = Array.isArray(players) ? players : [];
+        topPlayersCount.textContent = `${safePlayers.length} người`;
+
+        if (safePlayers.length === 0) {
+            topPlayersTbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Chưa có dữ liệu</td></tr>';
+            return;
+        }
+
+        topPlayersTbody.innerHTML = safePlayers.map((player, idx) => {
+            const winRateValue = getUserWinRate(player);
+            const totalMatches = Number(player?.total_matches ?? player?.totalMatches ?? 0);
+            const totalWins = Number(player?.total_wins ?? player?.totalWins ?? 0);
+
+            return `
+                <tr>
+                    <td class="fw-semibold">#${idx + 1}</td>
+                    <td class="fw-medium">${player?.username || '-'}</td>
+                    <td><span class="badge rounded-pill text-bg-warning">${winRateValue.toFixed(1)}%</span></td>
+                    <td>${totalMatches}</td>
+                    <td>${totalWins}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    
+    
+    async function fetchJson(url, options = {}) {
+        const response = await fetch(url, options);
+        const data = await response.json().catch(() => ({}));
+
+        if (response.status === 401) {
+            window.location.href = '/Login.html';
+            throw new Error('Unauthorized');
+        }
+
+        if (response.status === 403) {
+            window.location.href = '/Dashboard.html';
+            throw new Error('Forbidden');
+        }
+
+        if (!response.ok) {
+            const message = data.message || 'Yêu cầu thất bại';
+            throw new Error(message);
+        }
+
+        return data;
+    }
+
+    
+    async function loadRecentMatches() {
+        const tbody = document.getElementById('recent-matches-tbody');
+        const countBadge = document.getElementById('recent-matches-count');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Đang tải dữ liệu...
+                </td>
+            </tr>`;
+        try {
+            const matches = await fetchJson('/api/admin/recent-matches');
+            countBadge.textContent = `${matches.length} trận`;
+            if (!matches || matches.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted">Chưa có trận đấu nào</td></tr>';
+                return;
+            }
+            tbody.innerHTML = matches.map((m, idx) => {
+                let resultText = '';
+                let resultClass = '';
+                if (m.result === 'white') {
+                    resultText = `<strong>${m.white_player}</strong> thắng`;
+                    resultClass = 'text-success';
+                } else if (m.result === 'black') {
+                    resultText = `<strong>${m.black_player}</strong> thắng`;
+                    resultClass = 'text-success';
+                } else if (m.result === 'draw') {
+                    resultText = 'Hòa';
+                    resultClass = 'text-warning';
+                } else {
+                    resultText = m.result || '—';
+                }
+                if (m.reason) {
+                    const reasons = {
+                        'checkmate': 'Chiếu hết',
+                        'resign': 'Đầu hàng',
+                        'timeout': 'Hết giờ',
+                        'stalemate': 'Hết nước đi',
+                        'draw': 'Hòa cờ',
+                        'draw_agreement': 'Đồng ý hòa'
+                    };
+                    resultText += ` <small class="text-muted">(${reasons[m.reason] || m.reason})</small>`;
+                }
+                const replayBtn = m.has_pgn
+                    ? `<button class="btn btn-sm btn-outline-primary" onclick="openAdminReplay(${m.id})"><i class="fas fa-play me-1"></i>Xem</button>`
+                    : '<span class="text-muted">—</span>';
+                return `
+                    <tr>
+                        <td class="fw-semibold">${idx + 1}</td>
+                        <td><i class="fas fa-chess-king me-1 text-muted"></i>${m.white_player}</td>
+                        <td><i class="fas fa-chess-queen me-1 text-dark"></i>${m.black_player}</td>
+                        <td class="${resultClass}">${resultText}</td>
+                        <td class="text-muted">${m.played_at || '—'}</td>
+                        <td>${replayBtn}</td>
+                    </tr>`;
+            }).join('');
+        } catch (error) {
+            console.error('Error loading recent matches:', error);
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-5">Lỗi tải trận đấu</td></tr>';
+        }
+    }
+
+    
+    
+    async function loadStats() {
+        try {
+            const data = await fetchJson('/api/admin/stats');
+            document.getElementById('total-matches').textContent = data.totalMatches ?? 0;
+            document.getElementById('today-matches').textContent = data.todayMatches ?? 0;
+            document.getElementById('total-users').textContent = data.totalUsers ?? 0;
+            document.getElementById('total-matches-all').textContent = data.totalMatchesAll ?? data.totalMatches ?? 0;
+        } catch (error) {
+            console.error('Error loading stats:', error);
+            showToast('Không tải được thống kê', 'error');
+            setStatsLoading();
+        }
+    }
+
+    
+    async function loadUsers() {
+        setUsersLoading();
+        try {
+            const data = await fetchJson('/api/admin/users');
+            usersCache = Array.isArray(data.users) ? [...data.users] : [];
+            sortUsersByWinRate(winRateSortDirection);
+        } catch (error) {
+            console.error('Error loading users:', error);
+            usersTbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-5">Lỗi tải danh sách người dùng</td></tr>';
+            usersCount.textContent = '0 người';
+            showToast('Không tải được danh sách người dùng', 'error');
+        }
+    }
+
+    async function loadTopPlayers() {
+        setTopPlayersLoading();
+        try {
+            const data = await fetchJson('/api/admin/top-players');
+            renderTopPlayers(data.players || []);
+        } catch (error) {
+            console.error('Error loading top players:', error);
+            topPlayersTbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-5">Lỗi tải top người chơi</td></tr>';
+            topPlayersCount.textContent = '0 người';
+        }
+    }
+
+    
+    
+    async function lockUser(userId) {
+        if (!confirm('Bạn có chắc muốn khóa người dùng này?')) return;
+        try {
+            const data = await fetchJson(`/api/admin/users/lock/${userId}`, { method: 'POST' });
+            showToast(data.message || 'Khóa người dùng thành công');
+            await loadUsers();
+        } catch (error) {
+            console.error('Error locking user:', error);
+            showToast('Không thể khóa người dùng', 'error');
+        }
+    }
+
+    
+    
+    async function unlockUser(userId) {
+        if (!confirm('Bạn có chắc muốn mở khóa người dùng này?')) return;
+        try {
+            const data = await fetchJson(`/api/admin/users/unlock/${userId}`, { method: 'POST' });
+            showToast(data.message || 'Mở khóa người dùng thành công');
+            await loadUsers();
+        } catch (error) {
+            console.error('Error unlocking user:', error);
+            showToast('Không thể mở khóa người dùng', 'error');
+        }
+    }
+
+    
+    
+    async function refreshAll() {
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Đang làm mới';
+        await Promise.all([loadStats(), loadUsers(), loadTopPlayers(), loadRecentMatches()]);
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = '<i class="fas fa-rotate-right me-2"></i>Làm mới dữ liệu';
+    }
+
+    
+    
+    async function ensureAdminAccess() {
+        const response = await fetch('/api/admin/session');
+        if (response.status === 401) {
+            window.location.href = '/Login.html';
+            return false;
+        }
+        if (response.status === 403) {
+            window.location.href = '/Dashboard.html';
+            return false;
+        }
+        if (!response.ok) {
+            window.location.href = '/Login.html';
+            return false;
+        }
+        return true;
+    }
+
+    
+    
+    refreshBtn.addEventListener('click', refreshAll);
+    navOverview.addEventListener('click', (event) => {
+        event.preventDefault();
+        switchView('overview');
+    });
+    navUsers.addEventListener('click', (event) => {
+        event.preventDefault();
+        switchView('users');
+    });
+    sortWinRateBtn?.addEventListener('click', () => {
+        const nextDirection = winRateSortDirection === 'desc' ? 'asc' : 'desc';
+        sortUsersByWinRate(nextDirection);
+    });
+
+    
+    
+    
+
+    const PIECE_IMAGES = {
+        'wk': '/images/wk.png', 'wq': '/images/wq.png', 'wr': '/images/wr.png',
+        'wb': '/images/wb.png', 'wn': '/images/wn.png', 'wp': '/images/wp.png',
+        'bk': '/images/bk.png', 'bq': '/images/bq.png', 'br': '/images/br.png',
+        'bb': '/images/bb.png', 'bn': '/images/bn.png', 'bp': '/images/bp.png'
+    };
+
+    
+    async function viewUserMatches(userId, username) {
+        const modal = document.getElementById('matches-modal');
+        const body = document.getElementById('matches-modal-body');
+        document.getElementById('matches-modal-title').textContent = `Lịch sử ván đấu`;
+        document.getElementById('matches-modal-subtitle').textContent = `Kỳ thủ: ${username}`;
+        body.innerHTML = '<div class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2" role="status"></div>Đang tải...</div>';
+        modal.classList.add('show');
+
+        try {
+            const data = await fetchJson(`/api/admin/users/${userId}/matches`);
+            const matches = data.matches || [];
+
+            if (matches.length === 0) {
+                body.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-chess-board me-2"></i>Chưa có ván đấu nào</div>';
+                return;
+            }
+
+            let html = '<table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">';
+            html += `<thead class="table-light"><tr>
+                <th style="width:50px">#</th>
+                <th>Đối thủ</th>
+                <th style="width:80px">Kết quả</th>
+                <th>Lý do</th>
+                <th style="width:130px">Thời gian</th>
+                <th style="width:80px">Xem lại</th>
+            </tr></thead><tbody>`;
+
+            matches.forEach((m, idx) => {
+                const resultClass = m.result === 'Thắng' ? 'win' : m.result === 'Thua' ? 'lose' : 'draw';
+                const replayBtn = m.has_pgn
+                    ? `<button onclick="openAdminReplay(${m.id})" class="btn-view-matches" style="font-size:0.75rem;padding:2px 8px;"><i class="fas fa-play me-1"></i>Xem</button>`
+                    : '<span class="text-muted" style="font-size:0.75rem;">—</span>';
+
+                html += `<tr class="match-row">
+                    <td class="text-muted">${idx + 1}</td>
+                    <td class="fw-medium">${m.opponent || '-'}</td>
+                    <td><span class="result-badge ${resultClass}">${m.result}</span></td>
+                    <td class="text-muted">${m.reason || '-'}</td>
+                    <td class="text-muted">${m.date || '-'}</td>
+                    <td>${replayBtn}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            body.innerHTML = html;
+        } catch (error) {
+            console.error('Error loading user matches:', error);
+            body.innerHTML = '<div class="text-center py-5 text-danger"><i class="fas fa-exclamation-circle me-2"></i>Lỗi tải dữ liệu</div>';
+        }
+    }
+
+    function closeMatchesModal() {
+        document.getElementById('matches-modal').classList.remove('show');
+    }
+
+    
+    
+    
+
+    let adminChess = null;
+    let adminMoves = [];
+    let adminCurrentMove = 0;
+
+    
+    async function openAdminReplay(matchId) {
+        const modal = document.getElementById('replay-modal');
+        document.getElementById('replay-modal-title').textContent = 'Xem lại trận đấu';
+        document.getElementById('replay-modal-subtitle').textContent = 'Đang tải...';
+        document.getElementById('admin-replay-moves').innerHTML = '';
+        document.getElementById('admin-replay-counter').textContent = '0 / 0';
+        initAdminBoard();
+        modal.classList.add('show');
+
+        try {
+            const data = await fetchJson(`/api/admin/matches/${matchId}`);
+            const match = data.match;
+
+            if (!match || !match.pgn) {
+                document.getElementById('replay-modal-subtitle').textContent = 'Không có dữ liệu PGN';
+                return;
+            }
+
+            
+            const resultMap = { 'WHITE_WIN': 'Trắng thắng', 'BLACK_WIN': 'Đen thắng', 'DRAW': 'Hòa' };
+            document.getElementById('replay-modal-subtitle').textContent =
+                `${match.white_player || '?'} (Trắng) vs ${match.black_player || '?'} (Đen) — ${resultMap[match.result] || match.result} — ${match.reason || ''}`;
+
+            
+            adminChess = new Chess();
+            adminChess.load_pgn(match.pgn);
+            adminMoves = adminChess.history();
+            adminCurrentMove = 0;
+            adminChess.reset();
+
+            updateAdminBoard();
+            updateAdminMoveList();
+            updateAdminCounter();
+        } catch (error) {
+            console.error('Error loading match for replay:', error);
+            document.getElementById('replay-modal-subtitle').textContent = 'Lỗi tải dữ liệu';
+        }
+    }
+
+    function closeReplayModal() {
+        document.getElementById('replay-modal').classList.remove('show');
+        adminChess = null;
+        adminMoves = [];
+        adminCurrentMove = 0;
+    }
+
+    
+    function initAdminBoard() {
+        const board = document.getElementById('admin-replay-board');
+        board.innerHTML = '';
+        for (let i = 0; i < 64; i++) {
+            const row = Math.floor(i / 8);
+            const col = i % 8;
+            const isLight = (row + col) % 2 === 0;
+            const sq = document.createElement('div');
+            sq.className = `sq ${isLight ? 'sq-light' : 'sq-dark'}`;
+            sq.id = `admin-sq-${i}`;
+            const img = document.createElement('img');
+            img.style.display = 'none';
+            img.draggable = false;
+            sq.appendChild(img);
+            board.appendChild(sq);
+        }
+    }
+
+    
+    function updateAdminBoard() {
+        if (!adminChess) return;
+        for (let i = 0; i < 64; i++) {
+            const row = Math.floor(i / 8);
+            const col = i % 8;
+            const pos = 'abcdefgh'[col] + '87654321'[row];
+            const sq = document.getElementById(`admin-sq-${i}`);
+            if (!sq) continue;
+            const img = sq.querySelector('img');
+            const piece = adminChess.get(pos);
+            if (piece) {
+                img.src = PIECE_IMAGES[piece.color + piece.type];
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+                img.removeAttribute('src');
+            }
+        }
+    }
+
+    
+    function updateAdminMoveList() {
+        const el = document.getElementById('admin-replay-moves');
+        if (!el) return;
+        let html = '<table class="w-100"><tbody>';
+        for (let i = 0; i < adminMoves.length; i += 2) {
+            const num = Math.floor(i / 2) + 1;
+            const wActive = adminCurrentMove === i + 1 ? 'active-move' : '';
+            const bActive = adminCurrentMove === i + 2 ? 'active-move' : '';
+            html += `<tr>
+                <td style="width:30px;color:#94a3b8;">${num}.</td>
+                <td class="${wActive}" onclick="adminReplayGoTo(${i + 1})">${adminMoves[i]}</td>
+                <td class="${bActive}" onclick="adminReplayGoTo(${i + 2})">${adminMoves[i + 1] || ''}</td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        el.innerHTML = html;
+
+        const active = el.querySelector('.active-move');
+        if (active) active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+
+    function updateAdminCounter() {
+        document.getElementById('admin-replay-counter').textContent = `${adminCurrentMove} / ${adminMoves.length}`;
+    }
+
+    
+    function adminReplayNext() {
+        if (!adminChess || adminCurrentMove >= adminMoves.length) return;
+        adminChess.move(adminMoves[adminCurrentMove]);
+        adminCurrentMove++;
+        updateAdminBoard(); updateAdminMoveList(); updateAdminCounter();
+    }
+    function adminReplayBack() {
+        if (!adminChess || adminCurrentMove <= 0) return;
+        adminChess.undo();
+        adminCurrentMove--;
+        updateAdminBoard(); updateAdminMoveList(); updateAdminCounter();
+    }
+    function adminReplayFirst() {
+        if (!adminChess) return;
+        adminChess.reset(); adminCurrentMove = 0;
+        updateAdminBoard(); updateAdminMoveList(); updateAdminCounter();
+    }
+    function adminReplayLast() {
+        if (!adminChess) return;
+        while (adminCurrentMove < adminMoves.length) {
+            adminChess.move(adminMoves[adminCurrentMove]);
+            adminCurrentMove++;
+        }
+        updateAdminBoard(); updateAdminMoveList(); updateAdminCounter();
+    }
+    function adminReplayGoTo(moveIndex) {
+        if (!adminChess || moveIndex < 0 || moveIndex > adminMoves.length) return;
+        adminChess.reset();
+        for (let i = 0; i < moveIndex; i++) adminChess.move(adminMoves[i]);
+        adminCurrentMove = moveIndex;
+        updateAdminBoard(); updateAdminMoveList(); updateAdminCounter();
+    }
+
+    
+    document.addEventListener('keydown', (e) => {
+        const replayModal = document.getElementById('replay-modal');
+        if (!replayModal.classList.contains('show')) return;
+        if (e.key === 'ArrowRight') adminReplayNext();
+        else if (e.key === 'ArrowLeft') adminReplayBack();
+        else if (e.key === 'Home') { e.preventDefault(); adminReplayFirst(); }
+        else if (e.key === 'End') { e.preventDefault(); adminReplayLast(); }
+        else if (e.key === 'Escape') closeReplayModal();
+    });
+
+    
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+        const allowed = await ensureAdminAccess();
+        if (!allowed) {
+            return;
+        }
+        switchView('overview');
+        await refreshAll();
+    });
+</script>
+</body>
+</html>
+
