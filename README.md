@@ -35,8 +35,8 @@ Dự án đã được container hóa hoàn toàn. Bạn không cần cài đặ
 Mở Terminal và thực hiện các lệnh sau:
 
 ```bash
-# Clone source code
-git clone https://github.com/trungduc81/ChessWeb.git
+# Clone source code hoặc tải repo dưới dạng .zip và giải nén 
+git clone https://github.com/trungduc81/ChessWeb.git 
 cd ChessWeb
 
 # Khởi chạy toàn bộ hệ thống (App + Database)
